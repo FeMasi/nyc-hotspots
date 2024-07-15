@@ -50,7 +50,33 @@ class Controller:
 
 
     def handle_percorso(self, e):
-        pass
+        self._view.txt_result.controls.clear()
+        self._view.update_page()
+        print(self._choiceLocation)
+        target = self._choiceLocation
+        if self._choiceLocation is None:
+            self._view.create_alert("Selezionare un targer")
+            return
+        testo = self._view.txt_stringa.value
+        if testo == "":
+            self._view.create_alert("Attenzione stringa non inserita")
+            return
+
+        percorso, sorgente = self._model.get_cammino(target, testo)
+
+        if len(percorso) == 0:
+            self._view.txt_result.controls.append(ft.Text(f"Non esiste un percorso tra {sorgente}"
+                                                          f" e {target}"))
+        else:
+            self._view.txt_result.controls.append(ft.Text(f"Il nodo di partenza è {sorgente}"
+                                                        f" e la lunghezza del percorso è {len(percorso)}"))
+            self._view.txt_result.controls.append(ft.Text(f"il percorso attraversa i seguenti nodi"))
+
+            for p in percorso:
+                self._view.txt_result.controls.append(ft.Text(f"{p[0]}"))
+
+        self._view.update_page()
+
 
     def fillDDProvider(self):
         provider = self._model.get_provider()

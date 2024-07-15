@@ -1,3 +1,6 @@
+import copy
+import random
+
 from geopy.distance import distance
 
 import networkx as nx
@@ -31,13 +34,42 @@ class Model:
                     if distanza < soglia:
                         self._grafo.add_edge(u, v, weight=distanza)
 
+    def get_cammino(self, target, substring):
+        sources = self.getMostVicini()
+        source = sources[random.randint(0, len(sources) - 1)][0]
+        if not nx.has_path(self._grafo, source, target):
+            print(f"{source} e {target} non sono connessi.")
+            return [], source
+
+        self._bestPath = []
+        self._bestLen = 0
+        parziale = [source]
+
+        self.ricorsione(parziale, target, substring)
+        return self._bestPath, source
+
+    def ricorsione(self, parziale, target, substring):
+        #condizione di terminazione
+        if parziale[-1] == target:
+            if len(parziale) > self._bestLen:
+                self._bestPath = copy.deepcopy(parziale)
+                return
+
+        #ricorsione
+        for v in self._grafo.neighbors(parziale[-1]):
+            if v not in parziale and substring not in v.Location:
+                parziale.append(v)
+                self.ricorsione(parziale, target, substring)
+                parziale.pop()
+
     def getMostVicini(self):
         lista = []
         for v in self._nodes:
 
             lista.append((v, len(list(self._grafo.neighbors(v)))))
         lista.sort(key=lambda x: x[1], reverse=True)
-        return lista
+        result2 = [x for x in lista if x[1] == lista[0][1]]
+        return result2
 
 
     def get_graph_detail(self):
